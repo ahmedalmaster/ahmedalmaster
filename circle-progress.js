@@ -1,116 +1,80 @@
-$.fn.extend({
-  Progress: function(options){
-    var settings = {
-      width: 90, 
-      height: 20, 
-      percent: 0, 
-      backgroundColor: '#555', 
-      barColor: '#d9534f', 
-      fontColor: '#fff', 
-      radius: 4, 
-      fontSize: 12, 
-      increaseTime: 1000.00/60.00, 
-      increaseSpeed: 1, 
-      animate: true 
-    };
-    $.extend(settings, options);
+(function($){
+	$.fn.circleGraphic=function(options){
+		$.fn.circleGraphic.defaults={
+			color:'#F90',
+			startAngle: 0,
+			//endAngle:50
+		};
 
-    var $svg = $(this), $background, $bar, $g, $text, timeout;
+		var opts = $.extend({},$.fn.circleGraphic.defaults,options);
+		
+		var percentage=this.html();
+		var ID="c"+percentage+Math.random();
+		//alert(ID);
 
-    function progressPercent(p){
-      if(!$.isNumeric(p) || p < 0) {
-        return 0;
-      } else if(p > 100) {
-        return 100;
-      } else {
-        return p;
-      }
-    }        
+		this.append("<canvas id='"+ID+"'></canvas>");
 
-    var Animate = {
-      getWidth: function(){
-        return settings.width * settings.percent / 100.00;
-      },
-      getPercent: function(currentWidth){
-        return parseInt((100 * currentWidth / settings.width).toFixed(2));
-      },
-      animateWidth: function(currentWidth, targetWidth){
-        timeout = setTimeout(function(){
-          if(currentWidth > targetWidth) {
-            if(currentWidth - settings.increaseSpeed <= targetWidth) {
-              currentWidth = targetWidth;
-            } else {
-              currentWidth = currentWidth - settings.increaseSpeed;
-            }
-          } else if(currentWidth < targetWidth) {
-            if(currentWidth + settings.increaseSpeed >= targetWidth) {
-              currentWidth = targetWidth;
-            } else {
-              currentWidth = currentWidth + settings.increaseSpeed;
-            }
-          }
+		var canvas=document.getElementById(ID),
+			context=canvas.getContext('2d');
 
-          $bar.attr("width", currentWidth);
-          $text.empty().append(Animate.getPercent(currentWidth) + "%");
+		var Width = this.width();
+		this.height(Width);
+		var Height = this.height();
 
-          if(currentWidth != targetWidth) {
-            Animate.animateWidth(currentWidth, targetWidth);
-          }
-        }, settings.increaseTime); 
-      }
-    }
+		canvas.width = Width;
+		canvas.height = Height;
 
-    function svg(tag){
-      return document.createElementNS("http://www.w3.org/2000/svg", tag);
-    }
+		var startAngle = opts.startAngle,
+			endAngle = percentage/100,
+			angle = startAngle,
+			radius = Width*0.4;
 
-    !!function(){
-      settings.percent = progressPercent(settings.percent);
+		function drawTrackArc(){
+			context.beginPath();
+			context.strokeStyle = '#ECECEC';
+			context.lineWidth = 5;
+			context.arc(Width/2,Height/2,radius,(Math.PI/180)*(startAngle*360-90),(Math.PI/180)*(endAngle*360+270),false);
+			context.stroke();
+			context.closePath();
+		}
 
-      $svg.attr({'width': settings.width, 'height': settings.height});
+		function drawOuterArc(_angle,_color){
+			var angle = _angle;
+			var color = _color;
+			context.beginPath();
+			context.strokeStyle = color;
+			context.lineWidth = 10;
+			context.arc(Width/2,Height/2,radius,(Math.PI / 180) * (startAngle * 360 - 90), (Math.PI / 180) * (angle * 360 - 90), false);
+	       	context.stroke();
+	       	context.closePath();
+		}	
 
-      $background = $(svg("rect")).appendTo($svg)
-                      .attr({x: 0, rx: settings.radius, width: settings.width, height: settings.height, fill: settings.backgroundColor});
+		function numOfPercentage(_angle,_color){
+			var angle = Math.floor(_angle*100)+1;
+			var color=_color;
+			context.font = "50px fantasy";
+			context.fillStyle = color;
+			var metrics = context.measureText(angle);
+			var textWidth = metrics.width;
+			var xPos = Width/2-textWidth/2,
+				yPos = Height/2+textWidth/2;
+			context.fillText(angle+"%",xPos,yPos);
+		}
 
-      $bar = $(svg("rect")).appendTo($svg)
-                .attr({x: 0, rx: settings.radius, height: settings.height, fill: settings.barColor});
+		function draw(){
+			var loop = setInterval(function(){
+				context.clearRect(0,0,Width,Height);
+				drawTrackArc();
+				drawOuterArc(angle,opts.color);
+				numOfPercentage(angle,opts.color);
+				angle+=0.01;
+				if(angle>endAngle){
+					clearInterval(loop);
+				}
 
-      $g = $(svg("g")).appendTo($svg)
-                .attr({"fill": "#fff", "text-anchor": "middle", "font-family": "DejaVu Sans,Verdana,Geneva,sans-serif", "font-size": settings.fontSize});
-
-      $text = $(svg("text")).appendTo($g)
-                .attr({"x": settings.width/2.0, "y": settings.height/2.0 + settings.fontSize/3.0, fill: settings.fontColor});
-
-      draw();
-    }();
-
-    function draw() {
-      var targetWidth = Animate.getWidth();
-
-      if(settings.animate) {
-        if(timeout) {
-          clearTimeout(timeout);
-        }
-        var currentWidth = parseFloat($bar.attr("width"));
-        if(!currentWidth) currentWidth = 0;
-
-        Animate.animateWidth(currentWidth, targetWidth);
-      } else {
-        $bar.attr("width", targetWidth);
-        $text.empty().append(settings.percent + "%");
-      }
-    }
-
-    this.percent = function (p) {
-      if(p) {
-        p = progressPercent(p);
-
-        settings.percent = p;
-        draw();
-      }
-      return settings.percent;
-    }
-
-    return this;
-  }
-});
+			},1000/60);
+		}
+		draw();
+		return this;
+	};
+})(jQuery);
