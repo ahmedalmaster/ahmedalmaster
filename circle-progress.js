@@ -118,8 +118,8 @@
 	$.fn.progressCircle.defaults = {
 		nPercent        : 50,
 		showPercentText : true,
-		circleSize      : 100,
-		thickness       : 3
+		circleSize      : 200,
+		thickness       : 2
 	};
 
 })( jQuery );
