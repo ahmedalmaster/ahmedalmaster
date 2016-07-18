@@ -8,12 +8,12 @@
         var self = this;
         self.$element = ele,
         self.defaults = {
-            width: 400, //初始宽度
-            height: 250, //初始高度
+            width: 600, //初始宽度
+            height: 320, //初始高度
             start: 1, //初始滑动位置，从第几个开始滑动
             speed: 400, //滑动速度，单位ms
-            interval: 5000, //间隔时间，单位ms
-            autoPlay: true,  //是否自动滑动
+            interval: 3000, //间隔时间，单位ms
+            autoPlay: false,  //是否自动滑动
             dotShow: true, //是否显示圆点导航
             arrShow: true, //是否显示左右方向箭头导航
             touch: true, //是否支持触摸滑动
